@@ -34,7 +34,7 @@
 
 ## Build
 
-- [ ] `npm run tauri build` succeeds (requires Rust toolchain)
+- [x] `npm run tauri build` succeeds (requires Rust toolchain)
 
 ## Phase 2
 
