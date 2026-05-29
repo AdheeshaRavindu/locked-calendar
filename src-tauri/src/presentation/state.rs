@@ -5,7 +5,8 @@ use rusqlite::Connection;
 
 use crate::application::ports::CryptoProvider;
 use crate::application::services::{
-    AuthService, NoteService, OnThisDayService, SearchService, TagService, TimelineService,
+    AuthService, ExportService, NoteService, OnThisDayService, SearchService, TagService,
+    TimelineService,
 };
 use crate::application::services::auth_service::SessionKey;
 use crate::domain::errors::{DomainError, DomainResult};
@@ -24,6 +25,7 @@ pub struct AppState {
     pub timeline_service: TimelineService,
     pub on_this_day_service: OnThisDayService,
     pub tag_service: TagService,
+    pub export_service: ExportService,
 }
 
 impl AppState {
@@ -42,7 +44,8 @@ impl AppState {
             search_service: SearchService::new(Arc::clone(&crypto)),
             timeline_service: TimelineService::new(Arc::clone(&crypto)),
             on_this_day_service: OnThisDayService::new(Arc::clone(&crypto)),
-            tag_service: TagService::new(crypto),
+            tag_service: TagService::new(Arc::clone(&crypto)),
+            export_service: ExportService::new(crypto),
         }
     }
 

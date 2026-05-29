@@ -1,4 +1,5 @@
 import { BrowserRouter } from "react-router-dom";
+import { FocusModeProvider } from "@/app/layout/FocusModeContext";
 import { SessionProvider, useSession } from "@/hooks/useSession";
 import { LockScreen } from "@/features/lock/LockScreen";
 import { SetupPassword } from "@/features/lock/SetupPassword";
@@ -30,7 +31,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <SessionProvider>
-        <AuthGate />
+        <FocusModeProvider>
+          <AuthGate />
+        </FocusModeProvider>
       </SessionProvider>
     </BrowserRouter>
   );

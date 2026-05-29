@@ -72,6 +72,12 @@ export const api = {
   authGetLockTimeout: () => invoke<number>("auth_get_lock_timeout"),
   authSetLockTimeout: (seconds: number) =>
     invoke<void>("auth_set_lock_timeout", { seconds }),
+  authChangePassword: (oldPassword: string, newPassword: string) =>
+    invoke<void>("auth_change_password", {
+      oldPassword,
+      newPassword,
+    }),
+  exportNotesJson: () => invoke<string>("export_notes_json"),
   notesGetToday: () => invoke<Note>("notes_get_today"),
   notesGetByDate: (date: string) =>
     invoke<Note | null>("notes_get_by_date", { date }),

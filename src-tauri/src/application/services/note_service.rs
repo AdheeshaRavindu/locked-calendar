@@ -259,4 +259,86 @@ impl NoteService {
             .map(|r| self.decrypt_record(r, key))
             .collect()
     }
+
+    pub fn reencrypt_all(
+        &self,
+        conn: &Connection,
+        old_key: &[u8; 32],
+        new_key: &[u8; 32],
+    ) -> DomainResult<()> {
+        let repo = self.repo(conn);
+        let records = repo.list_all()?;
+        conn.execute("BEGIN IMMEDIATE", [])
+            .map_err(|e| DomainError::Storage(e.to_string()))?;
+        let result = (|| -> DomainResult<()> {
+            for record in records {
+                let note = self.decrypt_record(&record, old_key)?;
+                let reencrypted = self.encrypt_record(&note, new_key)?;
+                repo.update(&reencrypted)?;
+            }
+            Ok(())
+        })();
+        match result {
+            Ok(()) => {
+                conn.execute("COMMIT", [])
+                    .map_err(|e| DomainError::Storage(e.to_string()))?;
+                Ok(())
+            }
+            Err(err) => {
+                let _ = conn.execute("ROLLBACK", []);
+                Err(err)
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use chrono::NaiveDate;
+
+    use crate::application::services::auth_service::SessionKey;
+    use crate::application::ports::CryptoProvider;
+    use crate::infrastructure::crypto::AesGcmCryptoProvider;
+    use crate::infrastructure::db::connection::open_database;
+
+    use super::*;
+
+    #[test]
+    fn reencrypt_all_roundtrip() {
+        let dir = tempfile::tempdir().unwrap();
+        let conn = open_database(&dir.path().join("test.db")).unwrap();
+        let crypto: Arc<dyn CryptoProvider> = Arc::new(AesGcmCryptoProvider::new());
+        let notes = NoteService::new(Arc::clone(&crypto));
+        let salt = AesGcmCryptoProvider::generate_salt();
+        let key_a = crypto.derive_key("key-a", &salt).unwrap();
+        let key_b = crypto.derive_key("key-b", &salt).unwrap();
+        let session_a = Some(SessionKey(key_a));
+        let date = NaiveDate::from_ymd_opt(2024, 5, 30).unwrap();
+
+        notes
+            .save(
+                &conn,
+                &session_a,
+                None,
+                date,
+                "Title".into(),
+                "Content".into(),
+                vec!["tag".into()],
+                true,
+            )
+            .unwrap();
+
+        notes.reencrypt_all(&conn, &key_a, &key_b).unwrap();
+
+        let session_b = Some(SessionKey(key_b));
+        let note = notes.get_by_date(&conn, &session_b, date).unwrap().unwrap();
+        assert_eq!(note.title, "Title");
+        assert_eq!(note.content, "Content");
+        assert_eq!(note.tags, vec!["tag"]);
+        assert!(note.is_favorite);
+
+        assert!(notes.get_by_date(&conn, &session_a, date).is_err());
+    }
 }

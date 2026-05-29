@@ -86,3 +86,10 @@ src/
 - **On this day** — memories from the same date in prior years
 - **Tag chips** — autocomplete from existing tags
 - **Editor polish** — prev/next day navigation, delete entry, character count
+
+## Phase 2.5 features
+
+- **Focus mode** — hide sidebar for distraction-free writing (persists in session)
+- **Markdown preview** — Write, Preview, and Split views in the daily editor
+- **Change password** — verify current password, re-encrypt all notes, rotate KDF salt
+- **Export backup** — save decrypted notes as JSON via native save dialog

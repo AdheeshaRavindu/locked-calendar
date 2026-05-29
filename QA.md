@@ -45,3 +45,12 @@
 - [x] Clicking tag in search results adds tag filter
 - [x] Prev/next day navigation works across month boundaries
 - [x] Delete note removes entry and updates calendar dots
+
+## Phase 2.5
+
+- [ ] Focus mode hides sidebar; toggle persists while navigating
+- [ ] Markdown preview: Write / Preview / Split modes render headings, lists, bold
+- [x] Change password re-encrypts notes; unlock with new password works (Rust tests)
+- [x] Change password with wrong current password rejected; notes intact (Rust tests)
+- [ ] Export backup produces valid JSON via save dialog
+- [ ] Restart app after password change; new password works

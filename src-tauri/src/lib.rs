@@ -6,12 +6,14 @@ mod presentation;
 use tauri::Manager;
 
 use infrastructure::db::connection::open_database;
-use presentation::commands::{auth, notes, search, tags, timeline};
+use presentation::commands::{auth, export, notes, search, tags, timeline};
 use presentation::state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             let app_data_dir = app
                 .path()
@@ -31,6 +33,7 @@ pub fn run() {
             auth::auth_touch_session,
             auth::auth_get_lock_timeout,
             auth::auth_set_lock_timeout,
+            auth::auth_change_password,
             notes::notes_get_today,
             notes::notes_get_by_date,
             notes::notes_get_or_create,
@@ -42,6 +45,7 @@ pub fn run() {
             timeline::timeline_list,
             timeline::notes_on_this_day,
             tags::tags_list,
+            export::export_notes_json,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

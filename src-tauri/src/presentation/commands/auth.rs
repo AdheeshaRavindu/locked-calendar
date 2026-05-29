@@ -59,6 +59,27 @@ pub fn auth_unlock(
 }
 
 #[tauri::command]
+pub fn auth_change_password(
+    state: State<'_, AppState>,
+    old_password: String,
+    new_password: String,
+) -> Result<(), String> {
+    let session = state
+        .with_unlocked(|conn, _session| {
+            state.auth_service.change_password(
+                conn,
+                &state.note_service,
+                &old_password,
+                &new_password,
+            )
+        })
+        .map_err(map_err)?;
+    *state.session.lock() = Some(session);
+    state.touch_activity();
+    Ok(())
+}
+
+#[tauri::command]
 pub fn auth_lock(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     state.lock();
     let _ = app.emit("session-locked", ());
