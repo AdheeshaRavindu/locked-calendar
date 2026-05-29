@@ -23,7 +23,7 @@ const navItems: NavItem[] = [
   { to: "/", label: "Today", icon: null, end: true },
   { to: "/calendar", label: "Calendar", icon: Calendar },
   { to: "/search", label: "Search", icon: Search },
-  { to: "/timeline", label: "Timeline", icon: Clock, disabled: true },
+  { to: "/timeline", label: "Timeline", icon: Clock },
   { to: "/favorites", label: "Favorites", icon: Star },
   { to: "/settings", label: "Settings", icon: Settings },
 ];

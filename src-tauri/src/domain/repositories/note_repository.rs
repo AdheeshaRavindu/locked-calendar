@@ -17,5 +17,6 @@ pub trait NoteRepository {
     fn list_favorites(&self) -> DomainResult<Vec<EncryptedNoteRecord>>;
     fn list_future(&self, after: NaiveDate) -> DomainResult<Vec<EncryptedNoteRecord>>;
     fn list_for_month(&self, year: i32, month: u32) -> DomainResult<Vec<EncryptedNoteRecord>>;
+    fn list_by_month_day(&self, month: u32, day: u32) -> DomainResult<Vec<EncryptedNoteRecord>>;
     fn list_all(&self) -> DomainResult<Vec<EncryptedNoteRecord>>;
 }

@@ -79,3 +79,10 @@ src/
 - Favorites view
 - Settings (auto-lock timeout)
 - Dark premium UI
+
+## Phase 2 features
+
+- **Timeline** — scrollable journal history grouped by month
+- **On this day** — memories from the same date in prior years
+- **Tag chips** — autocomplete from existing tags
+- **Editor polish** — prev/next day navigation, delete entry, character count

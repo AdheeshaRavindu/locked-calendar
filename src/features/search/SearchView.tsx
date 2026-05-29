@@ -81,7 +81,19 @@ export function SearchView({
                 {note.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {note.tags.map((tag) => (
-                      <Badge key={tag}>{tag}</Badge>
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFilters((f) => ({
+                            ...f,
+                            tags: f.tags ? `${f.tags}, ${tag}` : tag,
+                          }));
+                        }}
+                      >
+                        <Badge>{tag}</Badge>
+                      </button>
                     ))}
                   </div>
                 )}

@@ -4,6 +4,7 @@ import { DailyEditor } from "@/features/editor/DailyEditor";
 import { CalendarView } from "@/features/calendar/CalendarView";
 import { SearchView } from "@/features/search/SearchView";
 import { SettingsView } from "@/features/settings/SettingsView";
+import { TimelineView } from "@/features/timeline/TimelineView";
 
 export function AppRoutes() {
   return (
@@ -12,6 +13,7 @@ export function AppRoutes() {
         <Route index element={<DailyEditor />} />
         <Route path="calendar" element={<CalendarView />} />
         <Route path="search" element={<SearchView />} />
+        <Route path="timeline" element={<TimelineView />} />
         <Route
           path="favorites"
           element={

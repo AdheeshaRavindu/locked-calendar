@@ -49,6 +49,19 @@ export interface SearchPayload {
   future_only: boolean;
 }
 
+export interface TimelineGroup {
+  month: string;
+  entries: NoteSummary[];
+}
+
+export interface OnThisDayEntry {
+  entry_date: string;
+  title: string;
+  snippet: string;
+  years_ago: number;
+  is_favorite: boolean;
+}
+
 export const api = {
   authIsInitialized: () => invoke<boolean>("auth_is_initialized"),
   authStatus: () => invoke<AuthStatus>("auth_status"),
@@ -73,4 +86,8 @@ export const api = {
     invoke<DayMarker[]>("notes_list_month", { year, month }),
   searchNotes: (payload: SearchPayload) =>
     invoke<NoteSummary[]>("search_notes", { payload }),
+  timelineList: () => invoke<TimelineGroup[]>("timeline_list"),
+  notesOnThisDay: (date: string) =>
+    invoke<OnThisDayEntry[]>("notes_on_this_day", { date }),
+  tagsList: () => invoke<string[]>("tags_list"),
 };

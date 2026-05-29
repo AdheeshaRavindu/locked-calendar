@@ -6,7 +6,7 @@ mod presentation;
 use tauri::Manager;
 
 use infrastructure::db::connection::open_database;
-use presentation::commands::{auth, notes, search};
+use presentation::commands::{auth, notes, search, tags, timeline};
 use presentation::state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -39,6 +39,9 @@ pub fn run() {
             notes::notes_toggle_favorite,
             notes::notes_list_month,
             search::search_notes,
+            timeline::timeline_list,
+            timeline::notes_on_this_day,
+            tags::tags_list,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

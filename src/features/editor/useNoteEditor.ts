@@ -76,12 +76,32 @@ export function useNoteEditor(entryDate: string) {
     noteRef.current = updated;
   }, []);
 
+  const deleteNote = useCallback(async () => {
+    const current = noteRef.current;
+    if (!current) return;
+    await api.notesDelete(current.id);
+    await load();
+    setSaveStatus("idle");
+  }, [load]);
+
+  const hasContent = useCallback(() => {
+    const current = noteRef.current;
+    if (!current) return false;
+    return (
+      current.title.trim().length > 0 ||
+      current.content.trim().length > 0 ||
+      current.tags.length > 0
+    );
+  }, []);
+
   return {
     note,
     loading,
     saveStatus,
     updateField,
     toggleFavorite,
+    deleteNote,
+    hasContent,
     reload: load,
   };
 }

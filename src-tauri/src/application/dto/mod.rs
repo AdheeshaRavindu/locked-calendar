@@ -36,6 +36,21 @@ pub struct AuthStatusResponse {
     pub unlocked: bool,
 }
 
+#[derive(Debug, Serialize)]
+pub struct TimelineGroup {
+    pub month: String,
+    pub entries: Vec<crate::domain::entities::NoteSummary>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OnThisDayEntry {
+    pub entry_date: String,
+    pub title: String,
+    pub snippet: String,
+    pub years_ago: i32,
+    pub is_favorite: bool,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NoteResponse {
     pub id: String,

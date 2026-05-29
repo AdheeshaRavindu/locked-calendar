@@ -4,7 +4,9 @@ use parking_lot::Mutex;
 use rusqlite::Connection;
 
 use crate::application::ports::CryptoProvider;
-use crate::application::services::{AuthService, NoteService, SearchService};
+use crate::application::services::{
+    AuthService, NoteService, OnThisDayService, SearchService, TagService, TimelineService,
+};
 use crate::application::services::auth_service::SessionKey;
 use crate::domain::errors::{DomainError, DomainResult};
 use crate::infrastructure::crypto::AesGcmCryptoProvider;
@@ -19,6 +21,9 @@ pub struct AppState {
     pub auth_service: AuthService,
     pub note_service: NoteService,
     pub search_service: SearchService,
+    pub timeline_service: TimelineService,
+    pub on_this_day_service: OnThisDayService,
+    pub tag_service: TagService,
 }
 
 impl AppState {
@@ -34,7 +39,10 @@ impl AppState {
             lock_timeout: Mutex::new(Duration::from_secs(lock_secs)),
             auth_service: AuthService::new(Arc::clone(&crypto)),
             note_service: NoteService::new(Arc::clone(&crypto)),
-            search_service: SearchService::new(crypto),
+            search_service: SearchService::new(Arc::clone(&crypto)),
+            timeline_service: TimelineService::new(Arc::clone(&crypto)),
+            on_this_day_service: OnThisDayService::new(Arc::clone(&crypto)),
+            tag_service: TagService::new(crypto),
         }
     }
 

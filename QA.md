@@ -35,3 +35,13 @@
 ## Build
 
 - [ ] `npm run tauri build` succeeds (requires Rust toolchain)
+
+## Phase 2
+
+- [x] Timeline lists all notes grouped by month, newest first
+- [x] Clicking timeline entry opens correct date in editor
+- [x] On this day shows entries from prior years on same month/day
+- [x] Tag chips add/remove correctly; suggestions appear from existing tags
+- [x] Clicking tag in search results adds tag filter
+- [x] Prev/next day navigation works across month boundaries
+- [x] Delete note removes entry and updates calendar dots

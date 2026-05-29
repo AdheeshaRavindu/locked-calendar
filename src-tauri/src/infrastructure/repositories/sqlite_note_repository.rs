@@ -226,6 +226,18 @@ impl NoteRepository for SqliteNoteRepository<'_> {
         self.list_by_date_range(Some(from), Some(to))
     }
 
+    fn list_by_month_day(&self, month: u32, day: u32) -> DomainResult<Vec<EncryptedNoteRecord>> {
+        let month_day = format!("{:02}-{:02}", month, day);
+        let sql = format!(
+            "SELECT {SELECT_COLS} FROM notes WHERE substr(entry_date, 6, 5) = ?1 ORDER BY entry_date DESC"
+        );
+        let stmt = self
+            .conn
+            .prepare(&sql)
+            .map_err(|e| DomainError::Storage(e.to_string()))?;
+        self.collect_rows(stmt, params![month_day])
+    }
+
     fn list_all(&self) -> DomainResult<Vec<EncryptedNoteRecord>> {
         let sql = format!("SELECT {SELECT_COLS} FROM notes ORDER BY entry_date DESC");
         let stmt = self
@@ -233,5 +245,56 @@ impl NoteRepository for SqliteNoteRepository<'_> {
             .prepare(&sql)
             .map_err(|e| DomainError::Storage(e.to_string()))?;
         self.collect_rows(stmt, [])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::repositories::NoteRepository;
+    use crate::infrastructure::db::connection::open_database;
+    use chrono::{TimeZone, Utc};
+    use uuid::Uuid;
+
+    fn sample_record(id: &str, date: &str) -> EncryptedNoteRecord {
+        EncryptedNoteRecord {
+            id: Uuid::parse_str(id).unwrap(),
+            entry_date: NaiveDate::parse_from_str(date, "%Y-%m-%d").unwrap(),
+            title_enc: b"t".to_vec(),
+            content_enc: b"c".to_vec(),
+            tags_enc: b"[]".to_vec(),
+            is_favorite: false,
+            created_at: Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+            updated_at: Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+        }
+    }
+
+    #[test]
+    fn list_by_month_day_matches_across_years() {
+        let dir = tempfile::tempdir().unwrap();
+        let conn = open_database(&dir.path().join("test.db")).unwrap();
+        let repo = SqliteNoteRepository::new(&conn);
+
+        repo.create(&sample_record(
+            "11111111-1111-1111-1111-111111111111",
+            "2023-05-30",
+        ))
+        .unwrap();
+        repo.create(&sample_record(
+            "22222222-2222-2222-2222-222222222222",
+            "2024-05-30",
+        ))
+        .unwrap();
+        repo.create(&sample_record(
+            "33333333-3333-3333-3333-333333333333",
+            "2024-06-01",
+        ))
+        .unwrap();
+
+        let results = repo.list_by_month_day(5, 30).unwrap();
+        assert_eq!(results.len(), 2);
+        assert!(results
+            .iter()
+            .all(|r| r.entry_date.format("%m-%d").to_string() == "05-30"));
     }
 }
