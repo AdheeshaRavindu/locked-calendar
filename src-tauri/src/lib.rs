@@ -3,10 +3,12 @@ mod domain;
 mod infrastructure;
 mod presentation;
 
+use std::sync::Arc;
+
 use tauri::Manager;
 
 use infrastructure::db::connection::open_database;
-use presentation::commands::{auth, export, notes, search, tags, timeline};
+use presentation::commands::{auth, export, notes, search, sync, tags, timeline};
 use presentation::state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -14,6 +16,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let app_data_dir = app
                 .path()
@@ -21,7 +24,7 @@ pub fn run() {
                 .expect("failed to resolve app data directory");
             let db_path = app_data_dir.join("locked-calendar.db");
             let conn = open_database(&db_path).expect("failed to open database");
-            app.manage(AppState::new(conn));
+            app.manage(Arc::new(AppState::new(conn)));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -46,6 +49,10 @@ pub fn run() {
             timeline::notes_on_this_day,
             tags::tags_list,
             export::export_notes_json,
+            sync::sync_connect,
+            sync::sync_disconnect,
+            sync::sync_now,
+            sync::sync_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

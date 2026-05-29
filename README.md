@@ -56,7 +56,7 @@ npm run tauri build
 src-tauri/src/
   domain/          # Entities, repository traits, errors
   application/     # Services, DTOs, crypto port
-  infrastructure/  # SQLite, AES-GCM, Argon2
+  infrastructure/  # SQLite, AES-GCM, Argon2, Google Drive sync
   presentation/    # Tauri commands, AppState
 src/
   features/        # UI by feature (lock, editor, calendar, search)
@@ -93,3 +93,28 @@ src/
 - **Markdown preview** — Write, Preview, and Split views in the daily editor
 - **Change password** — verify current password, re-encrypt all notes, rotate KDF salt
 - **Export backup** — save decrypted notes as JSON via native save dialog
+
+## Phase 3 features
+
+- **Google Drive sync** — two-way encrypted sync via a single Drive file (`drive.file` scope)
+- **Last-write-wins merge** — per-note conflict resolution by `updated_at`
+- **Manual + auto sync** — Sync now in Settings; debounced auto-sync after save/unlock (~30s)
+- **Vault identity** — shared KDF salt syncs across devices (same master password required)
+
+### Google Drive sync setup
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the **Google Drive API**.
+3. Configure the **OAuth consent screen** (External) and add your Google account as a test user.
+4. Create an OAuth client of type **Desktop app**.
+5. Add redirect URI: `http://127.0.0.1:8765/callback`
+6. Set the client ID before running the app:
+
+```powershell
+$env:GOOGLE_OAUTH_CLIENT_ID = "your-client-id.apps.googleusercontent.com"
+npm run tauri dev
+```
+
+The refresh token is encrypted with your session key before being stored locally.
+
+**Note:** Cloud sync requires one-time publisher OAuth setup (`GOOGLE_OAUTH_CLIENT_ID`). Once configured, each user connects their own Google account to sync to their Drive.

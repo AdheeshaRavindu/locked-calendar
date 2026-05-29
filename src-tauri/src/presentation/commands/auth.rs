@@ -1,8 +1,11 @@
+use std::sync::Arc;
+
 use tauri::{AppHandle, Emitter, State};
 
 use crate::application::dto::AuthStatusResponse;
 use crate::domain::errors::DomainError;
 use crate::infrastructure::db::meta_store::MetaStore;
+use crate::presentation::commands::sync;
 use crate::presentation::state::AppState;
 
 fn map_err(e: DomainError) -> String {
@@ -10,14 +13,14 @@ fn map_err(e: DomainError) -> String {
 }
 
 #[tauri::command]
-pub fn auth_is_initialized(state: State<'_, AppState>) -> Result<bool, String> {
+pub fn auth_is_initialized(state: State<'_, Arc<AppState>>) -> Result<bool, String> {
     state
         .with_conn(|conn| state.auth_service.is_initialized(conn))
         .map_err(map_err)
 }
 
 #[tauri::command]
-pub fn auth_status(state: State<'_, AppState>) -> Result<AuthStatusResponse, String> {
+pub fn auth_status(state: State<'_, Arc<AppState>>) -> Result<AuthStatusResponse, String> {
     let _ = state.check_idle_lock();
     let initialized = state
         .with_conn(|conn| state.auth_service.is_initialized(conn))
@@ -31,7 +34,7 @@ pub fn auth_status(state: State<'_, AppState>) -> Result<AuthStatusResponse, Str
 #[tauri::command]
 pub fn auth_setup(
     app: AppHandle,
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
     password: String,
 ) -> Result<(), String> {
     let session = state
@@ -46,7 +49,7 @@ pub fn auth_setup(
 #[tauri::command]
 pub fn auth_unlock(
     app: AppHandle,
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
     password: String,
 ) -> Result<(), String> {
     let session = state
@@ -55,12 +58,13 @@ pub fn auth_unlock(
     *state.session.lock() = Some(session);
     state.touch_activity();
     let _ = app.emit("session-unlocked", ());
+    sync::trigger_debounced_sync(app, &state);
     Ok(())
 }
 
 #[tauri::command]
 pub fn auth_change_password(
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
     old_password: String,
     new_password: String,
 ) -> Result<(), String> {
@@ -80,14 +84,14 @@ pub fn auth_change_password(
 }
 
 #[tauri::command]
-pub fn auth_lock(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+pub fn auth_lock(app: AppHandle, state: State<'_, Arc<AppState>>) -> Result<(), String> {
     state.lock();
     let _ = app.emit("session-locked", ());
     Ok(())
 }
 
 #[tauri::command]
-pub fn auth_touch_session(state: State<'_, AppState>) -> Result<(), String> {
+pub fn auth_touch_session(state: State<'_, Arc<AppState>>) -> Result<(), String> {
     state.check_idle_lock().map_err(map_err)?;
     if state.is_unlocked() {
         state.touch_activity();
@@ -96,14 +100,14 @@ pub fn auth_touch_session(state: State<'_, AppState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn auth_get_lock_timeout(state: State<'_, AppState>) -> Result<u64, String> {
+pub fn auth_get_lock_timeout(state: State<'_, Arc<AppState>>) -> Result<u64, String> {
     state
         .with_conn(|conn| MetaStore::new(conn).get_lock_timeout_secs())
         .map_err(map_err)
 }
 
 #[tauri::command]
-pub fn auth_set_lock_timeout(state: State<'_, AppState>, seconds: u64) -> Result<(), String> {
+pub fn auth_set_lock_timeout(state: State<'_, Arc<AppState>>, seconds: u64) -> Result<(), String> {
     if seconds < 60 {
         return Err("Lock timeout must be at least 60 seconds.".into());
     }

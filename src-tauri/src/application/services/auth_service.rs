@@ -56,6 +56,7 @@ impl AuthService {
 
         meta.set(KEY_SALT, &kdf_salt)?;
         meta.set(KEY_PASSWORD_HASH, &password_hash)?;
+        meta.ensure_vault_id()?;
 
         Ok(SessionKey(key))
     }

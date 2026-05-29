@@ -1,12 +1,14 @@
 import { NavLink } from "react-router-dom";
 import {
   Calendar,
+  CalendarDays,
   Clock,
   Lock,
   Search,
   Settings,
   Star,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSession";
@@ -14,13 +16,13 @@ import { useSession } from "@/hooks/useSession";
 type NavItem = {
   to: string;
   label: string;
-  icon: typeof Calendar | null;
+  icon: LucideIcon;
   end?: boolean;
   disabled?: boolean;
 };
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Today", icon: null, end: true },
+  { to: "/", label: "Today", icon: CalendarDays, end: true },
   { to: "/calendar", label: "Calendar", icon: Calendar },
   { to: "/search", label: "Search", icon: Search },
   { to: "/timeline", label: "Timeline", icon: Clock },

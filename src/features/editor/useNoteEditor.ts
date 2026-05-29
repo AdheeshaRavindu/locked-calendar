@@ -76,6 +76,12 @@ export function useNoteEditor(entryDate: string) {
     noteRef.current = updated;
   }, []);
 
+  const retrySave = useCallback(async () => {
+    const draft = noteRef.current;
+    if (!draft) return;
+    await persist(draft);
+  }, [persist]);
+
   const deleteNote = useCallback(async () => {
     const current = noteRef.current;
     if (!current) return;
@@ -102,6 +108,7 @@ export function useNoteEditor(entryDate: string) {
     toggleFavorite,
     deleteNote,
     hasContent,
+    retrySave,
     reload: load,
   };
 }

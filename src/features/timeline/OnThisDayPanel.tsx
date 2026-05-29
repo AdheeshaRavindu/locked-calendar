@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { api, type OnThisDayEntry } from "@/lib/invoke";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +24,7 @@ export function OnThisDayPanel({ date, compact = false }: OnThisDayPanelProps) {
   }, [date]);
 
   if (loading) {
-    return (
-      <p className="text-sm text-muted-foreground">Loading memories…</p>
-    );
+    return <LoadingState label="Loading memories…" className="py-4" />;
   }
 
   if (entries.length === 0) {

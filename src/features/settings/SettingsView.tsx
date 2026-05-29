@@ -1,11 +1,32 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "@/lib/invoke";
+import { LoadingState } from "@/components/ui/loading-state";
+import { api, type SyncStatus } from "@/lib/invoke";
+import { formatRelativeTime } from "@/lib/dates";
+import { formatUserError } from "@/lib/errors";
 import { useSession } from "@/hooks/useSession";
+
+function syncStatusBadge(status: SyncStatus | null) {
+  if (!status) return { label: "Loading…", variant: "muted" as const };
+  if (status.in_progress) return { label: "Syncing", variant: "accent" as const };
+  if (status.connected) return { label: "Connected", variant: "success" as const };
+  return { label: "Not connected", variant: "muted" as const };
+}
 
 export function SettingsView() {
   const { lock } = useSession();
@@ -20,11 +41,32 @@ export function SettingsView() {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [syncBusy, setSyncBusy] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [disconnectOpen, setDisconnectOpen] = useState(false);
+
+  const refreshSyncStatus = useCallback(async () => {
+    const status = await api.syncStatus();
+    setSyncStatus(status);
+  }, []);
 
   useEffect(() => {
     void api.authGetLockTimeout().then((secs) => {
       setTimeoutMinutes(Math.round(secs / 60));
     });
+    void refreshSyncStatus();
+  }, [refreshSyncStatus]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void listen<SyncStatus>("sync-status-changed", (event) => {
+      setSyncStatus(event.payload);
+    }).then((fn) => {
+      unlisten = fn;
+    });
+    return () => unlisten?.();
   }, []);
 
   const saveTimeout = async () => {
@@ -55,7 +97,7 @@ export function SettingsView() {
       setConfirmPassword("");
       setPasswordSuccess(true);
     } catch (err) {
-      setPasswordError(String(err));
+      setPasswordError(formatUserError(err, "Could not change password."));
     } finally {
       setChangingPassword(false);
     }
@@ -77,11 +119,63 @@ export function SettingsView() {
       await writeTextFile(path, json);
       setExportSuccess(`Backup saved to ${path}`);
     } catch (err) {
-      setExportError(String(err));
+      setExportError(formatUserError(err, "Export failed."));
     } finally {
       setExporting(false);
     }
   }
+
+  function clearSyncFeedback() {
+    setSyncSuccess(null);
+    setSyncError(null);
+  }
+
+  async function handleSyncConnect() {
+    clearSyncFeedback();
+    setSyncBusy(true);
+    try {
+      await api.syncConnect();
+      await refreshSyncStatus();
+      setSyncSuccess("Connected to Google Drive.");
+    } catch (err) {
+      setSyncError(formatUserError(err, "Could not connect to Google Drive."));
+    } finally {
+      setSyncBusy(false);
+    }
+  }
+
+  async function handleSyncDisconnect() {
+    clearSyncFeedback();
+    setSyncBusy(true);
+    try {
+      await api.syncDisconnect();
+      await refreshSyncStatus();
+      setSyncSuccess("Disconnected from Google Drive.");
+      setDisconnectOpen(false);
+    } catch (err) {
+      setSyncError(formatUserError(err, "Could not disconnect."));
+    } finally {
+      setSyncBusy(false);
+    }
+  }
+
+  async function handleSyncNow() {
+    clearSyncFeedback();
+    setSyncBusy(true);
+    try {
+      const result = await api.syncNow();
+      await refreshSyncStatus();
+      setSyncSuccess(
+        `Synced ${formatRelativeTime(result.last_sync_at)}. Applied ${result.merged.notes_applied} remote update(s).`,
+      );
+    } catch (err) {
+      setSyncError(formatUserError(err, "Sync failed."));
+    } finally {
+      setSyncBusy(false);
+    }
+  }
+
+  const badge = syncStatusBadge(syncStatus);
 
   return (
     <div className="mx-auto max-w-lg space-y-8 p-8">
@@ -164,6 +258,64 @@ export function SettingsView() {
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card/50 p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-medium">Cloud sync</h3>
+          <Badge variant={badge.variant}>{badge.label}</Badge>
+          {syncStatus?.in_progress && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Connect your Google account to sync encrypted notes to your Drive. Use the same master
+          password on every device.
+        </p>
+        {!syncStatus ? (
+          <LoadingState label="Loading sync status…" className="py-6" />
+        ) : (
+          <>
+            {syncStatus.connected && syncStatus.last_sync_at && (
+              <p className="text-sm text-muted-foreground">
+                Last sync: {formatRelativeTime(syncStatus.last_sync_at)}
+                <span className="ml-1 text-xs">
+                  ({new Date(syncStatus.last_sync_at).toLocaleString()})
+                </span>
+              </p>
+            )}
+            {syncStatus.error && (
+              <p className="text-sm text-destructive">
+                {formatUserError(syncStatus.error)}
+              </p>
+            )}
+            {syncSuccess && <p className="text-sm text-accent">{syncSuccess}</p>}
+            {syncError && <p className="text-sm text-destructive">{syncError}</p>}
+            <div className="flex flex-wrap gap-2">
+              {!syncStatus.connected ? (
+                <Button onClick={() => void handleSyncConnect()} disabled={syncBusy}>
+                  {syncBusy ? "Connecting…" : "Connect Google account"}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => void handleSyncNow()}
+                    disabled={syncBusy || syncStatus.in_progress}
+                  >
+                    {syncBusy || syncStatus.in_progress ? "Syncing…" : "Sync now"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setDisconnectOpen(true)}
+                    disabled={syncBusy}
+                  >
+                    Disconnect
+                  </Button>
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card/50 p-6">
         <h3 className="font-medium">Export backup</h3>
         <p className="text-sm text-muted-foreground">
           Exports decrypted notes as JSON. Store the file securely.
@@ -185,6 +337,26 @@ export function SettingsView() {
           Lock now
         </Button>
       </section>
+
+      <Dialog open={disconnectOpen} onOpenChange={setDisconnectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Disconnect Google account?</DialogTitle>
+            <DialogDescription>
+              Sync tokens will be removed from this device. Your journal on Google Drive is not
+              deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDisconnectOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => void handleSyncDisconnect()}>
+              Disconnect
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

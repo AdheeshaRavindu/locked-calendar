@@ -19,6 +19,8 @@ pub enum DomainError {
     Crypto(String),
     #[error("Storage error: {0}")]
     Storage(String),
+    #[error("Sync error: {0}")]
+    Sync(String),
 }
 
 impl DomainError {
@@ -32,6 +34,7 @@ impl DomainError {
             DomainError::Validation(msg) => msg.clone(),
             DomainError::Crypto(_) => "Could not process encrypted data.".into(),
             DomainError::Storage(_) => "Could not access local storage.".into(),
+            DomainError::Sync(msg) => msg.clone(),
         }
     }
 }

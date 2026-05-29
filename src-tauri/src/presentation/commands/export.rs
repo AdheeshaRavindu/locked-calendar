@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use tauri::State;
 
 use crate::presentation::state::AppState;
@@ -7,7 +9,7 @@ fn map_err(e: crate::domain::errors::DomainError) -> String {
 }
 
 #[tauri::command]
-pub fn export_notes_json(state: State<'_, AppState>) -> Result<String, String> {
+pub fn export_notes_json(state: State<'_, Arc<AppState>>) -> Result<String, String> {
     state
         .with_unlocked(|conn, session| {
             state

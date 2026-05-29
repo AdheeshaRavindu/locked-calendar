@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star } from "lucide-react";
+import { BookOpen, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { OnThisDayPanel } from "@/features/timeline/OnThisDayPanel";
 import { api, type TimelineGroup } from "@/lib/invoke";
 import { formatDisplayDate, todayIso } from "@/lib/dates";
+import { formatUserError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
 function formatMonthLabel(monthKey: string): string {
@@ -17,10 +21,25 @@ export function TimelineView() {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<TimelineGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadTimeline = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.timelineList();
+      setGroups(data);
+    } catch (err) {
+      setError(formatUserError(err, "Could not load timeline."));
+      setGroups([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    void api.timelineList().then(setGroups).finally(() => setLoading(false));
-  }, []);
+    void loadTimeline();
+  }, [loadTimeline]);
 
   const today = todayIso();
 
@@ -35,10 +54,25 @@ export function TimelineView() {
 
       <OnThisDayPanel date={today} />
 
+      {error && (
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">
+          <span>{error}</span>
+          <Button size="sm" variant="secondary" onClick={() => void loadTimeline()}>
+            Retry
+          </Button>
+        </div>
+      )}
+
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading timeline…</p>
-      ) : groups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No entries yet.</p>
+        <LoadingState label="Loading timeline…" />
+      ) : error ? null : groups.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title="Your journal is empty"
+          description="Start writing today and your entries will appear here over time."
+          actionLabel="Write today's entry"
+          onAction={() => navigate(`/?date=${today}`)}
+        />
       ) : (
         <div className="space-y-8">
           {groups.map((group) => (

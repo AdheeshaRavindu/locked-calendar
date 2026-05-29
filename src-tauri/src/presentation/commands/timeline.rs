@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use chrono::NaiveDate;
 use tauri::State;
 
@@ -14,7 +16,7 @@ fn parse_date(date: &str) -> Result<NaiveDate, String> {
 }
 
 #[tauri::command]
-pub fn timeline_list(state: State<'_, AppState>) -> Result<Vec<TimelineGroup>, String> {
+pub fn timeline_list(state: State<'_, Arc<AppState>>) -> Result<Vec<TimelineGroup>, String> {
     state
         .with_unlocked(|conn, session| {
             state
@@ -26,7 +28,7 @@ pub fn timeline_list(state: State<'_, AppState>) -> Result<Vec<TimelineGroup>, S
 
 #[tauri::command]
 pub fn notes_on_this_day(
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
     date: String,
 ) -> Result<Vec<OnThisDayEntry>, String> {
     let entry_date = parse_date(&date)?;

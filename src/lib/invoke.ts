@@ -62,6 +62,26 @@ export interface OnThisDayEntry {
   is_favorite: boolean;
 }
 
+export interface SyncStatus {
+  connected: boolean;
+  last_sync_at: string | null;
+  in_progress: boolean;
+  error: string | null;
+}
+
+export interface SyncMergeResult {
+  notes_applied: number;
+  notes_kept_local: number;
+  tombstones_applied: number;
+  notes_deleted: number;
+}
+
+export interface SyncNowResult {
+  merged: SyncMergeResult;
+  pushed: boolean;
+  last_sync_at: string;
+}
+
 export const api = {
   authIsInitialized: () => invoke<boolean>("auth_is_initialized"),
   authStatus: () => invoke<AuthStatus>("auth_status"),
@@ -96,4 +116,8 @@ export const api = {
   notesOnThisDay: (date: string) =>
     invoke<OnThisDayEntry[]>("notes_on_this_day", { date }),
   tagsList: () => invoke<string[]>("tags_list"),
+  syncConnect: () => invoke<{ connected: boolean }>("sync_connect"),
+  syncDisconnect: () => invoke<void>("sync_disconnect"),
+  syncNow: () => invoke<SyncNowResult>("sync_now"),
+  syncStatus: () => invoke<SyncStatus>("sync_status"),
 };

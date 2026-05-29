@@ -54,3 +54,16 @@
 - [x] Change password with wrong current password rejected; notes intact (Rust tests)
 - [ ] Export backup produces valid JSON via save dialog
 - [ ] Restart app after password change; new password works
+
+## Phase 3
+
+_Deferred — requires publisher `GOOGLE_OAUTH_CLIENT_ID` setup. End users connect their own Google account once configured._
+
+- [ ] `GOOGLE_OAUTH_CLIENT_ID` set; Connect Google Drive opens browser and completes OAuth
+- [ ] Initial sync creates `locked-calendar-sync.json` on Drive
+- [ ] Second device: connect + sync → notes appear with same master password
+- [ ] Edit on device A, sync; edit on device B, sync → last-write-wins result correct
+- [ ] Delete on one device propagates after sync
+- [ ] Disconnect clears tokens; reconnect works
+- [ ] Auto-sync fires ~30s after note save
+- [ ] Drive file contains encrypted blobs only (no plaintext title/content)

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use chrono::NaiveDate;
 use tauri::State;
 
@@ -21,7 +23,7 @@ fn parse_optional_date(value: &Option<String>) -> Result<Option<NaiveDate>, Stri
 
 #[tauri::command]
 pub fn search_notes(
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
     payload: SearchNotesRequest,
 ) -> Result<Vec<NoteSummary>, String> {
     let date_from = parse_optional_date(&payload.date_from)?;

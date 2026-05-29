@@ -9,7 +9,16 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { LoadingState } from "@/components/ui/loading-state";
 import { Textarea } from "@/components/ui/textarea";
 import { useFocusMode } from "@/app/layout/FocusModeContext";
 import { MarkdownPreview } from "@/features/editor/MarkdownPreview";
@@ -38,8 +47,10 @@ export function DailyEditor() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const entryDate = params.get("date") ?? todayIso();
+  const isToday = entryDate === todayIso();
   const { focusMode, toggleFocusMode } = useFocusMode();
   const [view, setView] = useState<EditorView>("write");
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const {
     note,
     loading,
@@ -48,24 +59,18 @@ export function DailyEditor() {
     toggleFavorite,
     deleteNote,
     hasContent,
+    retrySave,
   } = useNoteEditor(entryDate);
 
   if (loading || !note) {
-    return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        Loading entry…
-      </div>
-    );
+    return <LoadingState label="Loading entry…" className="h-full" />;
   }
 
   const goToDate = (iso: string) => navigate(`/?date=${iso}`);
 
-  const handleDelete = () => {
-    if (!hasContent()) return;
-    const confirmed = window.confirm(
-      "Delete this entry permanently? This cannot be undone.",
-    );
-    if (confirmed) void deleteNote();
+  const handleDelete = async () => {
+    await deleteNote();
+    setDeleteOpen(false);
   };
 
   return (
@@ -87,9 +92,20 @@ export function DailyEditor() {
           </Button>
           <div>
             <p className="text-sm text-muted-foreground">Journal</p>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              {formatDisplayDate(note.entry_date)}
-            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-2xl font-semibold tracking-tight">
+                {formatDisplayDate(note.entry_date)}
+              </h2>
+              {!isToday && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => goToDate(todayIso())}
+                >
+                  Back to today
+                </Button>
+              )}
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -141,7 +157,7 @@ export function DailyEditor() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleDelete}
+            onClick={() => setDeleteOpen(true)}
             disabled={!hasContent()}
             aria-label="Delete entry"
           >
@@ -164,6 +180,15 @@ export function DailyEditor() {
           </Button>
         </div>
       </header>
+
+      {saveStatus === "error" && (
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">
+          <span>Could not save your changes.</span>
+          <Button size="sm" variant="secondary" onClick={() => void retrySave()}>
+            Retry save
+          </Button>
+        </div>
+      )}
 
       <OnThisDayPanel date={entryDate} compact />
 
@@ -207,10 +232,27 @@ export function DailyEditor() {
         <span>{note.content.length} characters</span>
       </div>
 
-      <TagInput
-        tags={note.tags}
-        onChange={(tags) => updateField("tags", tags)}
-      />
+      <TagInput tags={note.tags} onChange={(tags) => updateField("tags", tags)} />
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this entry?</DialogTitle>
+            <DialogDescription>
+              This permanently removes the entry for {formatDisplayDate(note.entry_date)}.
+              This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDelete()}>
+              Delete entry
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
