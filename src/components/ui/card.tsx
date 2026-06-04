@@ -1,17 +1,29 @@
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+
+const cardVariants = cva(
+  "rounded-2xl border border-border bg-card text-card-foreground",
+  {
+    variants: {
+      variant: {
+        default: "shadow-card",
+        elevated: "shadow-elevated",
+        flat: "shadow-none",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
 
 export function Card({
   className,
+  variant,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof cardVariants>) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border border-border bg-card text-card-foreground shadow-lg shadow-black/20",
-        className,
-      )}
-      {...props}
-    />
+    <div className={cn(cardVariants({ variant }), className)} {...props} />
   );
 }
 
@@ -19,7 +31,7 @@ export function CardHeader({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-1 p-6 pb-4", className)} {...props} />;
+  return <div className={cn("flex flex-col gap-1.5 p-6 pb-4", className)} {...props} />;
 }
 
 export function CardTitle({
@@ -36,7 +48,7 @@ export function CardDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-sm text-muted-foreground", className)} {...props} />
+    <p className={cn("text-sm leading-relaxed text-muted-foreground", className)} {...props} />
   );
 }
 

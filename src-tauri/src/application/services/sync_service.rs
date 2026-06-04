@@ -23,6 +23,8 @@ impl SyncService {
             content_enc: BASE64.encode(&record.content_enc),
             tags_enc: BASE64.encode(&record.tags_enc),
             is_favorite: record.is_favorite,
+            is_done: record.is_done,
+            mood: record.mood,
             created_at: record.created_at,
             updated_at: record.updated_at,
         }
@@ -44,6 +46,8 @@ impl SyncService {
                 .decode(&note.tags_enc)
                 .map_err(|e| DomainError::Sync(format!("Invalid tags_enc encoding: {e}")))?,
             is_favorite: note.is_favorite,
+            is_done: note.is_done,
+            mood: note.mood,
             created_at: note.created_at,
             updated_at: note.updated_at,
         })
@@ -249,6 +253,8 @@ mod tests {
                 "body".into(),
                 vec![],
                 false,
+                false,
+                None,
             )
             .unwrap();
         let repo = SqliteNoteRepository::new(conn);

@@ -49,7 +49,7 @@ export function CalendarView() {
   return (
     <div className="mx-auto max-w-2xl p-8">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h2 className="text-2xl font-semibold">Calendar</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Calendar</h2>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" onClick={goToToday}>
             Today
@@ -57,6 +57,7 @@ export function CalendarView() {
           <Button
             variant="ghost"
             size="icon"
+            className="rounded-xl"
             onClick={() => setMonth((m) => shiftMonth(m, -1))}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -67,6 +68,7 @@ export function CalendarView() {
           <Button
             variant="ghost"
             size="icon"
+            className="rounded-xl"
             onClick={() => setMonth((m) => shiftMonth(m, 1))}
           >
             <ChevronRight className="h-4 w-4" />
@@ -93,7 +95,8 @@ export function CalendarView() {
       )}
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Click a day to open or create an entry. Dots indicate notes; amber dots are favorites.
+        Click a day to open its entry. Blue dots are notes; checkmarks are done days; emoji shows
+        mood. Set done and mood in the editor.
       </p>
     </div>
   );

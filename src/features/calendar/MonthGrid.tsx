@@ -11,7 +11,9 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MOOD_OPTIONS } from "@/lib/mood";
 import type { DayMarker } from "@/lib/invoke";
 
 interface MonthGridProps {
@@ -53,31 +55,53 @@ export function MonthGrid({
         const inMonth = isSameMonth(day, month);
         const isSelected = isSameDay(day, selected);
         const isToday = isSameDay(day, new Date());
+        const moodEmoji = marker?.mood
+          ? MOOD_OPTIONS.find((m) => m.value === marker.mood)?.emoji
+          : null;
 
         return (
           <button
             key={iso}
             type="button"
+            title={
+              marker?.is_done
+                ? "Done"
+                : moodEmoji
+                  ? `Mood: ${MOOD_OPTIONS.find((m) => m.value === marker?.mood)?.label}`
+                  : undefined
+            }
             onClick={() => onSelectDate(iso)}
             className={cn(
-              "relative flex h-12 flex-col items-center justify-center rounded-lg text-sm transition-colors",
-              inMonth ? "text-foreground hover:bg-muted" : "text-muted-foreground/40",
-              isSelected && "bg-accent text-accent-foreground hover:bg-accent/90",
-              isToday && !isSelected && "ring-1 ring-accent/50",
+              "relative flex h-11 flex-col items-center justify-center rounded-full text-sm transition-colors",
+              inMonth ? "text-foreground" : "text-muted-foreground/35",
+              !isSelected && inMonth && "hover:bg-muted/70",
+              isSelected && "bg-accent font-medium text-accent-foreground hover:bg-accent/90",
+              isToday && !isSelected && "ring-2 ring-accent/40 ring-offset-2 ring-offset-background",
             )}
           >
             {format(day, "d")}
-            <span className="absolute bottom-1 flex gap-0.5">
-              {marker?.has_note && (
+            <span className="absolute bottom-0 flex items-center gap-0.5">
+              {marker?.is_done && (
+                <Check
+                  className={cn(
+                    "h-2.5 w-2.5",
+                    isSelected ? "text-accent-foreground" : "text-emerald-500",
+                  )}
+                />
+              )}
+              {!marker?.is_done && marker?.has_note && (
                 <span
                   className={cn(
                     "h-1 w-1 rounded-full",
-                    isSelected ? "bg-accent-foreground" : "bg-accent",
+                    isSelected ? "bg-accent-foreground/80" : "bg-accent",
                   )}
                 />
               )}
               {marker?.is_favorite && (
-                <span className="h-1 w-1 rounded-full bg-amber-400" />
+                <span className="h-1 w-1 rounded-full bg-amber-500" />
+              )}
+              {moodEmoji && (
+                <span className="text-[9px] leading-none">{moodEmoji}</span>
               )}
             </span>
           </button>

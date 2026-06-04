@@ -6,6 +6,7 @@ import {
   toSearchPayload,
   type FilterState,
 } from "@/features/search/FilterBar";
+import { EntryMeta } from "@/components/EntryMeta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -79,7 +80,7 @@ export function SearchView({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-8">
-      <h2 className="text-2xl font-semibold">{title}</h2>
+      <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
       {!isFavoritesView && <FilterBar filters={filters} onChange={setFilters} />}
 
       {error && (
@@ -140,10 +141,12 @@ export function SearchView({
                 <button
                   type="button"
                   onClick={() => navigate(`/?date=${note.entry_date}`)}
-                  className="w-full rounded-xl border border-border bg-card/50 p-4 text-left transition-colors hover:bg-muted/50"
+                  className="w-full rounded-2xl border border-border bg-card p-4 text-left shadow-card transition-colors hover:bg-muted/60"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">{note.title}</span>
+                    <span className="flex items-center gap-2">
+                      <EntryMeta is_done={note.is_done} mood={note.mood} />
                     <Star
                       className={cn(
                         "h-4 w-4 shrink-0",
@@ -152,6 +155,7 @@ export function SearchView({
                           : "text-transparent",
                       )}
                     />
+                    </span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDisplayDate(note.entry_date)}

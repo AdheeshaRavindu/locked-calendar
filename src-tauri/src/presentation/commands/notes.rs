@@ -71,6 +71,8 @@ pub fn notes_save(
                 payload.content,
                 payload.tags,
                 payload.is_favorite,
+                payload.is_done,
+                payload.mood,
             )
         })
         .map_err(map_err)?;

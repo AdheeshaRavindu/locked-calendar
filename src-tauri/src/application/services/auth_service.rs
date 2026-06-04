@@ -165,6 +165,8 @@ mod tests {
                 "Content".into(),
                 vec![],
                 false,
+                false,
+                None,
             )
             .unwrap();
 
@@ -197,6 +199,8 @@ mod tests {
                 "Secret".into(),
                 vec!["journal".into()],
                 false,
+                false,
+                None,
             )
             .unwrap();
 

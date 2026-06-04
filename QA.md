@@ -49,7 +49,7 @@
 ## Phase 2.5
 
 - [ ] Focus mode hides sidebar; toggle persists while navigating
-- [ ] Markdown preview: Write / Preview / Split modes render headings, lists, bold
+- [ ] Markdown preview removed (Phase 4); checklist `- [ ]` toggles work in editor
 - [x] Change password re-encrypts notes; unlock with new password works (Rust tests)
 - [x] Change password with wrong current password rejected; notes intact (Rust tests)
 - [ ] Export backup produces valid JSON via save dialog
@@ -67,3 +67,11 @@ _Deferred — requires publisher `GOOGLE_OAUTH_CLIENT_ID` setup. End users conne
 - [ ] Disconnect clears tokens; reconnect works
 - [ ] Auto-sync fires ~30s after note save
 - [ ] Drive file contains encrypted blobs only (no plaintext title/content)
+
+## Phase 4
+
+- [ ] Mark day done without writing text; calendar shows checkmark; clearing done removes empty row
+- [ ] Mood picker sets and clears mood; calendar shows emoji; persists after restart
+- [ ] Checklist lines `- [ ]` appear in Tasks section; clicking toggles to `- [x]` and saves
+- [ ] Export JSON includes `is_done` and `mood` fields
+- [ ] Sync merge preserves `is_done` and `mood` across devices (when Phase 3 OAuth configured)

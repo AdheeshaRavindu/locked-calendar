@@ -10,6 +10,8 @@ pub struct Note {
     pub content: String,
     pub tags: Vec<String>,
     pub is_favorite: bool,
+    pub is_done: bool,
+    pub mood: Option<u8>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -22,6 +24,8 @@ pub struct EncryptedNoteRecord {
     pub content_enc: Vec<u8>,
     pub tags_enc: Vec<u8>,
     pub is_favorite: bool,
+    pub is_done: bool,
+    pub mood: Option<u8>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -33,6 +37,8 @@ pub struct NoteSummary {
     pub title: String,
     pub snippet: String,
     pub is_favorite: bool,
+    pub is_done: bool,
+    pub mood: Option<u8>,
     pub tags: Vec<String>,
 }
 
@@ -41,4 +47,6 @@ pub struct DayMarker {
     pub date: String,
     pub has_note: bool,
     pub is_favorite: bool,
+    pub is_done: bool,
+    pub mood: Option<u8>,
 }

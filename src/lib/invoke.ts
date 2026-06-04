@@ -12,6 +12,8 @@ export interface Note {
   content: string;
   tags: string[];
   is_favorite: boolean;
+  is_done: boolean;
+  mood: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -22,6 +24,8 @@ export interface NoteSummary {
   title: string;
   snippet: string;
   is_favorite: boolean;
+  is_done: boolean;
+  mood: number | null;
   tags: string[];
 }
 
@@ -29,6 +33,8 @@ export interface DayMarker {
   date: string;
   has_note: boolean;
   is_favorite: boolean;
+  is_done: boolean;
+  mood: number | null;
 }
 
 export interface SaveNotePayload {
@@ -38,6 +44,8 @@ export interface SaveNotePayload {
   content: string;
   tags: string[];
   is_favorite: boolean;
+  is_done: boolean;
+  mood: number | null;
 }
 
 export interface SearchPayload {

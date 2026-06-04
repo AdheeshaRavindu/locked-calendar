@@ -34,20 +34,20 @@ export function Sidebar() {
   const { lock } = useSession();
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-card/50 p-4">
+    <aside className="flex w-56 shrink-0 flex-col border-r border-border/50 bg-card/60 p-4 backdrop-blur-xl">
       <div className="mb-8 px-2">
-        <h1 className="text-lg font-semibold tracking-tight">Locked Calendar</h1>
-        <p className="text-xs text-muted-foreground">Private encrypted journal</p>
+        <h1 className="text-[13px] font-semibold tracking-tight">Locked Calendar</h1>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">Private encrypted journal</p>
       </div>
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-0.5">
         {navItems.map((item) =>
           item.disabled ? (
             <span
               key={item.to}
               title="Coming soon"
-              className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground/50"
+              className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted-foreground/50"
             >
-              {item.icon && <item.icon className="h-4 w-4" />}
+              <item.icon className="h-4 w-4" />
               {item.label}
             </span>
           ) : (
@@ -57,20 +57,20 @@ export function Sidebar() {
               end={"end" in item ? item.end : false}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
                   isActive
-                    ? "bg-accent/15 text-accent"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-accent/12 font-semibold text-accent"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )
               }
             >
-              {item.icon && <item.icon className="h-4 w-4" />}
+              <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
             </NavLink>
           ),
         )}
       </nav>
-      <Button variant="ghost" className="justify-start gap-2" onClick={() => void lock()}>
+      <Button variant="ghost" className="justify-start gap-2 rounded-xl" onClick={() => void lock()}>
         <Lock className="h-4 w-4" />
         Lock now
       </Button>

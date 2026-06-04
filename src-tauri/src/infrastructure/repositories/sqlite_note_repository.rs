@@ -22,8 +22,10 @@ impl<'a> SqliteNoteRepository<'a> {
         let content_enc: Vec<u8> = row.get(3)?;
         let tags_enc: Vec<u8> = row.get(4)?;
         let is_favorite: i32 = row.get(5)?;
-        let created_at: String = row.get(6)?;
-        let updated_at: String = row.get(7)?;
+        let is_done: i32 = row.get(6)?;
+        let mood: Option<i32> = row.get(7)?;
+        let created_at: String = row.get(8)?;
+        let updated_at: String = row.get(9)?;
 
         Ok(EncryptedNoteRecord {
             id: Uuid::parse_str(&id).map_err(|e| {
@@ -36,15 +38,17 @@ impl<'a> SqliteNoteRepository<'a> {
             content_enc,
             tags_enc,
             is_favorite: is_favorite != 0,
+            is_done: is_done != 0,
+            mood: mood.map(|m| m as u8),
             created_at: DateTime::parse_from_rfc3339(&created_at)
                 .map(|dt| dt.with_timezone(&Utc))
                 .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Text, Box::new(e))
+                    rusqlite::Error::FromSqlConversionFailure(8, rusqlite::types::Type::Text, Box::new(e))
                 })?,
             updated_at: DateTime::parse_from_rfc3339(&updated_at)
                 .map(|dt| dt.with_timezone(&Utc))
                 .map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(7, rusqlite::types::Type::Text, Box::new(e))
+                    rusqlite::Error::FromSqlConversionFailure(9, rusqlite::types::Type::Text, Box::new(e))
                 })?,
         })
     }
@@ -66,14 +70,14 @@ impl<'a> SqliteNoteRepository<'a> {
 }
 
 const SELECT_COLS: &str =
-    "id, entry_date, title_enc, content_enc, tags_enc, is_favorite, created_at, updated_at";
+    "id, entry_date, title_enc, content_enc, tags_enc, is_favorite, is_done, mood, created_at, updated_at";
 
 impl NoteRepository for SqliteNoteRepository<'_> {
     fn create(&self, record: &EncryptedNoteRecord) -> DomainResult<()> {
         self.conn
             .execute(
-                "INSERT INTO notes (id, entry_date, title_enc, content_enc, tags_enc, is_favorite, created_at, updated_at)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                "INSERT INTO notes (id, entry_date, title_enc, content_enc, tags_enc, is_favorite, is_done, mood, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
                 params![
                     record.id.to_string(),
                     record.entry_date.format("%Y-%m-%d").to_string(),
@@ -81,6 +85,8 @@ impl NoteRepository for SqliteNoteRepository<'_> {
                     record.content_enc,
                     record.tags_enc,
                     record.is_favorite as i32,
+                    record.is_done as i32,
+                    record.mood.map(i32::from),
                     record.created_at.to_rfc3339(),
                     record.updated_at.to_rfc3339(),
                 ],
@@ -94,7 +100,7 @@ impl NoteRepository for SqliteNoteRepository<'_> {
             .conn
             .execute(
                 "UPDATE notes SET entry_date = ?2, title_enc = ?3, content_enc = ?4, tags_enc = ?5,
-                 is_favorite = ?6, updated_at = ?7 WHERE id = ?1",
+                 is_favorite = ?6, is_done = ?7, mood = ?8, updated_at = ?9 WHERE id = ?1",
                 params![
                     record.id.to_string(),
                     record.entry_date.format("%Y-%m-%d").to_string(),
@@ -102,6 +108,8 @@ impl NoteRepository for SqliteNoteRepository<'_> {
                     record.content_enc,
                     record.tags_enc,
                     record.is_favorite as i32,
+                    record.is_done as i32,
+                    record.mood.map(i32::from),
                     record.updated_at.to_rfc3339(),
                 ],
             )
@@ -264,6 +272,8 @@ mod tests {
             content_enc: b"c".to_vec(),
             tags_enc: b"[]".to_vec(),
             is_favorite: false,
+            is_done: false,
+            mood: None,
             created_at: Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
             updated_at: Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
         }

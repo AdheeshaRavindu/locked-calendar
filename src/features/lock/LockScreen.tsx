@@ -31,17 +31,19 @@ export function LockScreen() {
   };
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-background p-6">
-      <Card className={cn("w-full max-w-md", shake && "animate-shake")}>
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">
-            <Lock className="h-6 w-6" />
+    <div className="flex min-h-full items-center justify-center bg-background p-8">
+      <Card variant="elevated" className={cn("w-full max-w-md", shake && "animate-shake")}>
+        <CardHeader className="items-center pb-2 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/12 text-accent">
+            <Lock className="h-7 w-7" />
           </div>
-          <CardTitle>Locked Calendar</CardTitle>
-          <CardDescription>Enter your master password to unlock your journal.</CardDescription>
+          <CardTitle className="text-2xl">Locked Calendar</CardTitle>
+          <CardDescription className="max-w-xs">
+            Enter your master password to unlock your journal.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="pt-2">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="password">Master password</Label>
               <Input
@@ -54,7 +56,7 @@ export function LockScreen() {
               />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading || !password}>
+            <Button type="submit" className="w-full" size="lg" disabled={loading || !password}>
               {loading ? "Unlocking…" : "Unlock"}
             </Button>
           </form>

@@ -3,6 +3,19 @@ import { api, type Note } from "@/lib/invoke";
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
+function toPayload(draft: Note) {
+  return {
+    id: draft.id,
+    entry_date: draft.entry_date,
+    title: draft.title,
+    content: draft.content,
+    tags: draft.tags,
+    is_favorite: draft.is_favorite,
+    is_done: draft.is_done,
+    mood: draft.mood,
+  };
+}
+
 export function useNoteEditor(entryDate: string) {
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,14 +44,7 @@ export function useNoteEditor(entryDate: string) {
   const persist = useCallback(async (draft: Note) => {
     setSaveStatus("saving");
     try {
-      const saved = await api.notesSave({
-        id: draft.id,
-        entry_date: draft.entry_date,
-        title: draft.title,
-        content: draft.content,
-        tags: draft.tags,
-        is_favorite: draft.is_favorite,
-      });
+      const saved = await api.notesSave(toPayload(draft));
       setNote(saved);
       noteRef.current = saved;
       setSaveStatus("saved");
@@ -66,6 +72,16 @@ export function useNoteEditor(entryDate: string) {
       scheduleSave({ ...current, [key]: value });
     },
     [scheduleSave],
+  );
+
+  const saveNow = useCallback(
+    (draft: Note) => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+      noteRef.current = draft;
+      setNote(draft);
+      void persist(draft);
+    },
+    [persist],
   );
 
   const toggleFavorite = useCallback(async () => {
@@ -110,5 +126,6 @@ export function useNoteEditor(entryDate: string) {
     hasContent,
     retrySave,
     reload: load,
+    saveNow,
   };
 }

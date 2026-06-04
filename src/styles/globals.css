@@ -1,22 +1,59 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
+
+/* Semantic tokens — dark default, light via system preference */
+:root {
+  color-scheme: dark;
+  --lc-background: hsl(0 0% 7%);
+  --lc-foreground: hsl(0 0% 96%);
+  --lc-card: hsl(0 0% 11%);
+  --lc-card-foreground: hsl(0 0% 96%);
+  --lc-muted: hsl(0 0% 15%);
+  --lc-muted-foreground: hsl(0 0% 55%);
+  --lc-border: hsl(0 0% 18%);
+  --lc-accent: hsl(211 100% 50%);
+  --lc-accent-foreground: hsl(0 0% 100%);
+  --lc-destructive: hsl(0 72% 51%);
+  --lc-ring: hsl(211 100% 50%);
+  --lc-shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.24);
+  --lc-shadow-md: 0 4px 16px hsl(0 0% 0% / 0.28);
+  --lc-shadow-lg: 0 8px 32px hsl(0 0% 0% / 0.36);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --lc-background: hsl(0 0% 98%);
+    --lc-foreground: hsl(0 0% 9%);
+    --lc-card: hsl(0 0% 100%);
+    --lc-card-foreground: hsl(0 0% 9%);
+    --lc-muted: hsl(0 0% 94%);
+    --lc-muted-foreground: hsl(0 0% 42%);
+    --lc-border: hsl(0 0% 90%);
+    --lc-accent: hsl(211 100% 45%);
+    --lc-accent-foreground: hsl(0 0% 100%);
+    --lc-destructive: hsl(0 72% 48%);
+    --lc-ring: hsl(211 100% 45%);
+    --lc-shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.06);
+    --lc-shadow-md: 0 4px 16px hsl(0 0% 0% / 0.08);
+    --lc-shadow-lg: 0 8px 32px hsl(0 0% 0% / 0.12);
+  }
+}
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-background: hsl(222 47% 5%);
-  --color-foreground: hsl(210 40% 96%);
-  --color-card: hsl(222 47% 8%);
-  --color-card-foreground: hsl(210 40% 96%);
-  --color-muted: hsl(217 33% 14%);
-  --color-muted-foreground: hsl(215 20% 62%);
-  --color-border: hsl(217 33% 16%);
-  --color-accent: hsl(245 58% 58%);
-  --color-accent-foreground: hsl(210 40% 98%);
-  --color-destructive: hsl(0 72% 51%);
-  --color-ring: hsl(245 58% 58%);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --color-background: var(--lc-background);
+  --color-foreground: var(--lc-foreground);
+  --color-card: var(--lc-card);
+  --color-card-foreground: var(--lc-card-foreground);
+  --color-muted: var(--lc-muted);
+  --color-muted-foreground: var(--lc-muted-foreground);
+  --color-border: var(--lc-border);
+  --color-accent: var(--lc-accent);
+  --color-accent-foreground: var(--lc-accent-foreground);
+  --color-destructive: var(--lc-destructive);
+  --color-ring: var(--lc-ring);
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 @layer base {
@@ -33,6 +70,38 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--lc-accent) 35%, transparent);
+    color: var(--lc-foreground);
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    @apply transition-colors duration-150;
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: var(--lc-shadow-md);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--lc-shadow-lg);
+  }
+
+  .surface-inset {
+    @apply rounded-2xl border border-border bg-muted/40;
+  }
+
+  .label-caps {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+
 }
 
 @keyframes shake {

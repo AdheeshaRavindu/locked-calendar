@@ -8,9 +8,9 @@ export function AppShell() {
   const { focusMode } = useFocusMode();
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="flex h-full min-h-0 bg-background">
       {!focusMode && <Sidebar />}
-      <main className="min-h-0 flex-1 overflow-auto">
+      <main className="min-h-0 flex-1 overflow-auto bg-background">
         <Outlet />
       </main>
     </div>

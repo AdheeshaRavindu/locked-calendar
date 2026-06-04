@@ -18,6 +18,9 @@ pub struct SaveNoteRequest {
     pub content: String,
     pub tags: Vec<String>,
     pub is_favorite: bool,
+    #[serde(default)]
+    pub is_done: bool,
+    pub mood: Option<u8>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -59,6 +62,8 @@ pub struct NoteResponse {
     pub content: String,
     pub tags: Vec<String>,
     pub is_favorite: bool,
+    pub is_done: bool,
+    pub mood: Option<u8>,
     pub created_at: String,
     pub updated_at: String,
 }

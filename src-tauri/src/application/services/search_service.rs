@@ -82,13 +82,19 @@ fn to_summary(note: &Note) -> NoteSummary {
     NoteSummary {
         id: note.id.to_string(),
         entry_date: note.entry_date.format("%Y-%m-%d").to_string(),
-        title: if note.title.is_empty() {
-            "Untitled".into()
-        } else {
+        title: if !note.title.is_empty() {
             note.title.clone()
+        } else if note.is_done {
+            "Day completed".into()
+        } else if note.mood.is_some() {
+            "Mood logged".into()
+        } else {
+            "Untitled".into()
         },
         snippet,
         is_favorite: note.is_favorite,
+        is_done: note.is_done,
+        mood: note.mood,
         tags: note.tags.clone(),
     }
 }

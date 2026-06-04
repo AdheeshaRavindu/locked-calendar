@@ -18,6 +18,10 @@ pub struct SyncNoteRecord {
     pub content_enc: String,
     pub tags_enc: String,
     pub is_favorite: bool,
+    #[serde(default)]
+    pub is_done: bool,
+    #[serde(default)]
+    pub mood: Option<u8>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

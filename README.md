@@ -34,6 +34,10 @@ Rust installs to `%USERPROFILE%\.cargo\bin`. If a terminal opened **before** Rus
    ```
 3. This project’s `npm run tauri` script prepends `.cargo\bin` automatically when needed.
 
+### Troubleshooting `EACCES` on port 1420 (Windows)
+
+Hyper-V and WSL can reserve TCP ports **1330–1429**, which blocks the old Tauri default **1420**. This repo uses Vite on **5173** instead. If you still see a port error, check reserved ranges: `netsh interface ipv4 show excludedportrange protocol=tcp`.
+
 ### Troubleshooting `link.exe` not found (Windows)
 
 Install **Visual Studio Build Tools** with the **Desktop development with C++** workload, then restart the terminal:
@@ -90,7 +94,7 @@ src/
 ## Phase 2.5 features
 
 - **Focus mode** — hide sidebar for distraction-free writing (persists in session)
-- **Markdown preview** — Write, Preview, and Split views in the daily editor
+- **Markdown preview** — (removed in Phase 4; use `- [ ]` task lines in the editor instead)
 - **Change password** — verify current password, re-encrypt all notes, rotate KDF salt
 - **Export backup** — save decrypted notes as JSON via native save dialog
 
@@ -118,3 +122,10 @@ npm run tauri dev
 The refresh token is encrypted with your session key before being stored locally.
 
 **Note:** Cloud sync requires one-time publisher OAuth setup (`GOOGLE_OAUTH_CLIENT_ID`). Once configured, each user connects their own Google account to sync to their Drive.
+
+## Phase 4 features
+
+- **Mark day done** — check off a day on the calendar (with or without journal text)
+- **Mood** — optional 5-level mood per day (emoji picker in the editor)
+- **Checklists** — `- [ ]` / `- [x]` task lines with clickable toggles in the editor
+- **Write-only editor** — Preview and Split modes removed for a simpler journaling flow

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Star } from "lucide-react";
+import { EntryMeta } from "@/components/EntryMeta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -46,7 +47,7 @@ export function TimelineView() {
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-semibold">Timeline</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Timeline</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Your journal history, grouped by month.
         </p>
@@ -86,10 +87,12 @@ export function TimelineView() {
                     <button
                       type="button"
                       onClick={() => navigate(`/?date=${entry.entry_date}`)}
-                      className="w-full rounded-xl border border-border bg-card/50 p-4 text-left transition-colors hover:bg-muted/50"
+                      className="w-full rounded-2xl border border-border bg-card p-4 text-left shadow-card transition-colors hover:bg-muted/60"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-medium">{entry.title}</span>
+                        <span className="flex items-center gap-2">
+                          <EntryMeta is_done={entry.is_done} mood={entry.mood} />
                         <Star
                           className={cn(
                             "h-4 w-4 shrink-0",
@@ -98,6 +101,7 @@ export function TimelineView() {
                               : "text-transparent",
                           )}
                         />
+                        </span>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {formatDisplayDate(entry.entry_date)}
