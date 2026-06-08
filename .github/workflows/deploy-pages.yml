@@ -1,0 +1,36 @@
+name: Deploy docs to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cairosvg
+
+      - name: Convert SVG to PNG
+        run: |
+          mkdir -p docs/assets
+          python - <<'PY'
+from cairosvg import svg2png
+svg2png(url='icons/logo.svg', write_to='docs/assets/logo-128.png', output_width=128, output_height=128)
+PY
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
