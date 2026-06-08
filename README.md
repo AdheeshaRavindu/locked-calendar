@@ -100,7 +100,7 @@ src/
 
 ## Phase 3 features
 
-- **Google Drive sync** — two-way encrypted sync via a single Drive file (`drive.file` scope)
+- **Google Drive sync** — two-way encrypted sync via a hidden app data file (`drive.appdata` scope)
 - **Last-write-wins merge** — per-note conflict resolution by `updated_at`
 - **Manual + auto sync** — Sync now in Settings; debounced auto-sync after save/unlock (~30s)
 - **Vault identity** — shared KDF salt syncs across devices (same master password required)
@@ -110,18 +110,25 @@ src/
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
 2. Enable the **Google Drive API**.
 3. Configure the **OAuth consent screen** (External) and add your Google account as a test user.
-4. Create an OAuth client of type **Desktop app**.
-5. Add redirect URI: `http://127.0.0.1:8765/callback`
-6. Set the client ID before running the app:
+4. Add the `https://www.googleapis.com/auth/drive.appdata` scope in **Data Access**.
+5. Create an OAuth client of type **Desktop app**.
+6. Copy `.env.example` to `.env.local`, then set the client ID:
+
+```text
+GOOGLE_OAUTH_CLIENT_ID=your-client-id.apps.googleusercontent.com
+```
+
+7. Run the app:
 
 ```powershell
-$env:GOOGLE_OAUTH_CLIENT_ID = "your-client-id.apps.googleusercontent.com"
 npm run tauri dev
 ```
 
-The refresh token is encrypted with your session key before being stored locally.
+The sync file is stored in Google Drive's hidden app data folder, not in the user's visible Drive files. The refresh token is encrypted with your session key before being stored locally.
 
 **Note:** Cloud sync requires one-time publisher OAuth setup (`GOOGLE_OAUTH_CLIENT_ID`). Once configured, each user connects their own Google account to sync to their Drive.
+
+Privacy policy: host `privacy.html` from this repository (or an equivalent public URL) and paste that URL into the OAuth consent screen when submitting verification.
 
 ## Phase 4 features
 

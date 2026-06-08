@@ -8,8 +8,8 @@ export function formatUserError(err: unknown, fallback = "Something went wrong. 
 
   const msg = raw.replace(/^Error:\s*/i, "").trim();
 
-  if (/GOOGLE_OAUTH_CLIENT_ID|Google OAuth is not configured/i.test(msg)) {
-    return "Cloud sync is not configured yet. The app publisher must enable Google OAuth before you can connect your account.";
+  if (/GOOGLE_OAUTH_CLIENT_ID|GOOGLE_OAUTH_CLIENT_SECRET|Google OAuth is not configured|Google OAuth is missing/i.test(msg)) {
+    return "Cloud sync is not configured yet. Add GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET to .env.local, then restart the app.";
   }
   if (/Incorrect password/i.test(msg)) {
     return "Incorrect password.";

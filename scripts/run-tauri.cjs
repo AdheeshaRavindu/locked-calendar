@@ -1,6 +1,41 @@
 const { spawnSync } = require("child_process");
+const fs = require("fs");
 const path = require("path");
 const os = require("os");
+
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+
+  for (const line of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const equals = trimmed.indexOf("=");
+    if (equals === -1) {
+      continue;
+    }
+
+    const key = trimmed.slice(0, equals).trim();
+    let value = trimmed.slice(equals + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (key && process.env[key] == null) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadEnvFile(path.resolve(__dirname, "..", ".env"));
+loadEnvFile(path.resolve(__dirname, "..", ".env.local"));
 
 const cargoBin =
   process.env.CARGO_HOME != null

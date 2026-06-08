@@ -4,8 +4,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Maximize2,
-  Minimize2,
+  PanelLeftClose,
+  PanelLeftOpen,
   Star,
   Trash2,
 } from "lucide-react";
@@ -85,17 +85,18 @@ export function DailyEditor() {
   return (
     <div
       className={cn(
-        "mx-auto flex h-full flex-col gap-8 p-8",
+        "mx-auto flex h-full flex-col gap-8 p-4 sm:p-6 lg:p-8",
         focusMode ? "max-w-4xl" : "max-w-3xl",
       )}
     >
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-1">
           <Button
             variant="ghost"
             size="icon"
             className="rounded-xl"
             onClick={() => goToDate(prevDayIso(entryDate))}
+            title="Previous day"
             aria-label="Previous day"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -122,12 +123,13 @@ export function DailyEditor() {
             size="icon"
             className="rounded-xl"
             onClick={() => goToDate(nextDayIso(entryDate))}
+            title="Next day"
             aria-label="Next day"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 self-end sm:self-auto">
           <span
             className={cn(
               "mr-2 min-w-[4.5rem] text-xs text-muted-foreground transition-opacity",
@@ -137,17 +139,21 @@ export function DailyEditor() {
             {saveLabel(saveStatus)}
           </span>
           <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xl"
+            variant="secondary"
+            size="sm"
+            className="h-10 w-10 rounded-xl px-0 md:w-auto md:px-3"
             onClick={toggleFocusMode}
-            aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
+            title={focusMode ? "Show sidebar" : "Hide sidebar"}
+            aria-label={focusMode ? "Show sidebar" : "Hide sidebar"}
           >
             {focusMode ? (
-              <Minimize2 className="h-4 w-4" />
+              <PanelLeftOpen className="h-4 w-4" />
             ) : (
-              <Maximize2 className="h-4 w-4" />
+              <PanelLeftClose className="h-4 w-4" />
             )}
+            <span className="hidden md:inline">
+              {focusMode ? "Show sidebar" : "Hide sidebar"}
+            </span>
           </Button>
           <Button
             variant="ghost"
@@ -155,6 +161,7 @@ export function DailyEditor() {
             className="rounded-xl"
             onClick={() => setDeleteOpen(true)}
             disabled={!hasContent() && !note.is_done && note.mood == null}
+            title="Delete entry"
             aria-label="Delete entry"
           >
             <Trash2 className="h-4 w-4 text-muted-foreground" />
@@ -164,6 +171,7 @@ export function DailyEditor() {
             size="icon"
             className="rounded-xl"
             onClick={() => void toggleFavorite()}
+            title="Toggle favorite"
             aria-label="Toggle favorite"
           >
             <Star

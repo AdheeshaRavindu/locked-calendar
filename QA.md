@@ -60,7 +60,7 @@
 _Deferred — requires publisher `GOOGLE_OAUTH_CLIENT_ID` setup. End users connect their own Google account once configured._
 
 - [ ] `GOOGLE_OAUTH_CLIENT_ID` set; Connect Google Drive opens browser and completes OAuth
-- [ ] Initial sync creates `locked-calendar-sync.json` on Drive
+- [ ] Initial sync creates `locked-calendar-sync.json` in Drive app data
 - [ ] Second device: connect + sync → notes appear with same master password
 - [ ] Edit on device A, sync; edit on device B, sync → last-write-wins result correct
 - [ ] Delete on one device propagates after sync

@@ -107,7 +107,7 @@ impl GoogleDriveProvider {
             SYNC_DRIVE_FILENAME.replace('\'', "\\'")
         );
         let url = format!(
-            "https://www.googleapis.com/drive/v3/files?q={}&spaces=drive&fields=files(id,name,etag)",
+            "https://www.googleapis.com/drive/v3/files?q={}&spaces=appDataFolder&fields=files(id,name)",
             urlencoding::encode(&query)
         );
         let response = self
@@ -133,11 +133,12 @@ impl GoogleDriveProvider {
     async fn create_empty_file(&self, access_token: &str) -> DomainResult<DriveFileMeta> {
         let metadata = serde_json::json!({
             "name": SYNC_DRIVE_FILENAME,
-            "mimeType": "application/json"
+            "mimeType": "application/json",
+            "parents": ["appDataFolder"]
         });
         let response = self
             .http
-            .post("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart")
+            .post("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name")
             .bearer_auth(access_token)
             .header("Content-Type", "multipart/related; boundary=boundary_lc")
             .body(format!(
@@ -161,7 +162,7 @@ impl GoogleDriveProvider {
 
     async fn fetch_file_metadata(&self, access_token: &str, file_id: &str) -> DomainResult<DriveFileMeta> {
         let url = format!(
-            "https://www.googleapis.com/drive/v3/files/{file_id}?fields=id,etag,name"
+            "https://www.googleapis.com/drive/v3/files/{file_id}?fields=id,name"
         );
         let response = self
             .http
@@ -246,7 +247,7 @@ impl SyncProvider for GoogleDriveProvider {
         let body = serde_json::to_string_pretty(bundle)
             .map_err(|e| DomainError::Sync(format!("Could not serialize sync bundle: {e}")))?;
         let url = format!(
-            "https://www.googleapis.com/upload/drive/v3/files/{file_id}?uploadType=media"
+            "https://www.googleapis.com/upload/drive/v3/files/{file_id}?uploadType=media&fields=id,name"
         );
         let mut headers = HeaderMap::new();
         headers.insert("Content-Type", HeaderValue::from_static("application/json"));

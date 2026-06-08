@@ -13,7 +13,7 @@ use crate::domain::errors::{DomainError, DomainResult};
 
 pub const OAUTH_REDIRECT_PORT: u16 = 8765;
 pub const OAUTH_REDIRECT_PATH: &str = "/callback";
-pub const DRIVE_FILE_SCOPE: &str = "https://www.googleapis.com/auth/drive.file";
+pub const DRIVE_FILE_SCOPE: &str = "https://www.googleapis.com/auth/drive.appdata";
 
 #[derive(Debug, Clone)]
 pub struct OAuthTokens {
@@ -31,6 +31,14 @@ pub fn google_client_id() -> DomainResult<String> {
     std::env::var("GOOGLE_OAUTH_CLIENT_ID").map_err(|_| {
         DomainError::Sync(
             "Google OAuth is not configured. Set GOOGLE_OAUTH_CLIENT_ID.".into(),
+        )
+    })
+}
+
+fn google_client_secret() -> DomainResult<String> {
+    std::env::var("GOOGLE_OAUTH_CLIENT_SECRET").map_err(|_| {
+        DomainError::Sync(
+            "Google OAuth is missing GOOGLE_OAUTH_CLIENT_SECRET.".into(),
         )
     })
 }
@@ -90,10 +98,12 @@ fn handle_callback_request(stream: &mut TcpStream) -> DomainResult<(String, Stri
 
 async fn exchange_code(client_id: &str, code: &str, verifier: &str) -> DomainResult<OAuthTokens> {
     let client = Client::new();
+    let client_secret = google_client_secret()?;
     let response = client
         .post("https://oauth2.googleapis.com/token")
         .form(&[
             ("client_id", client_id),
+            ("client_secret", &client_secret),
             ("code", code),
             ("code_verifier", verifier),
             ("grant_type", "authorization_code"),
@@ -162,10 +172,12 @@ pub async fn run_oauth_flow(open_url: impl FnOnce(String) -> DomainResult<()>) -
 
 pub async fn refresh_access_token(client_id: &str, refresh_token: &str) -> DomainResult<String> {
     let client = Client::new();
+    let client_secret = google_client_secret()?;
     let response = client
         .post("https://oauth2.googleapis.com/token")
         .form(&[
             ("client_id", client_id),
+            ("client_secret", &client_secret),
             ("refresh_token", refresh_token),
             ("grant_type", "refresh_token"),
         ])
