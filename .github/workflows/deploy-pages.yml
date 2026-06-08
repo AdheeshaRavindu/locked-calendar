@@ -18,6 +18,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y librsvg2-bin
 
+      - name: Copy existing PNG logo if available
+        run: |
+          mkdir -p docs/assets
+          if [ -f icons/logo.png ]; then
+            cp icons/logo.png docs/assets/logo-128.png
+          fi
+
       - name: Convert SVG to PNG using rsvg-convert
         run: |
           mkdir -p docs/assets
