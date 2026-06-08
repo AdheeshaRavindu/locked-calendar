@@ -113,3 +113,11 @@ If you need a short support blurb:
 ---
 
 If you want, I can add this file to the repository now (I will) and then create a `privacy.html` file from the privacy policy content we drafted earlier. Tell me to proceed if you want both files added. 
+
+---
+
+## Current project owner decision
+
+- The project owner has opted to keep the OAuth client in **Testing (unverified)** mode and accept the Google-imposed limit of **up to 100 test users** for now. The files in this repo document the verification assets in case you later decide to submit for verification.
+
+If you change your mind and want me to prepare the verification submission artifacts or walk through the verification steps, say so and I'll prepare the final package.

@@ -1,0 +1,38 @@
+name: Deploy docs to Cloudflare Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install librsvg for SVG conversion
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+
+      - name: Copy existing PNG logo if available
+        run: |
+          mkdir -p docs/assets
+          if [ -f icons/logo.png ]; then
+            cp icons/logo.png docs/assets/logo-128.png
+          fi
+
+      - name: Convert SVG to PNG using rsvg-convert (if present)
+        run: |
+          mkdir -p docs/assets
+          if [ -f icons/logo.svg ]; then
+            rsvg-convert -w 128 -h 128 icons/logo.svg -o docs/assets/logo-128.png
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: ./docs

@@ -128,6 +128,19 @@ The sync file is stored in Google Drive's hidden app data folder, not in the use
 
 **Note:** Cloud sync requires one-time publisher OAuth setup (`GOOGLE_OAUTH_CLIENT_ID`). Once configured, each user connects their own Google account to sync to their Drive.
 
+Status note (important):
+- The OAuth client used for Cloud sync is currently in **Testing** (unverified) mode. In this state the app is limited to up to 100 test users as enforced by Google. If you are comfortable with this limitation, no further action is required.
+- To remove this limit and publish to all users, you must complete Google OAuth verification and brand verification in the Cloud Console (see `verification-checklist.md`).
+
+Installer location (after build):
+- Build the desktop app with:
+
+```bash
+npm run tauri build
+```
+
+- After a successful build, platform installer bundles live in `src-tauri/target/release/bundle/` (subfolders per platform). For Windows you will typically find an `nsis/` folder containing the installer `.exe` (or `wix/` for MSI). If you do not see `src-tauri/target/release/bundle/`, run the build from the project root so Tauri builds under `src-tauri`.
+
 Privacy policy: host `privacy.html` from this repository (or an equivalent public URL) and paste that URL into the OAuth consent screen when submitting verification.
 
 ## Phase 4 features
